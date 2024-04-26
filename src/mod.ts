@@ -7,3 +7,4 @@ export * from './types/mod.ts';
 export { TBaseObservable } from './t_base_observable.ts';
 export { TAbstractObserver } from './t_abstract_observer.ts';
 export { TSubscription } from './t_subscription.ts';
+export { VERSION } from './version.ts';

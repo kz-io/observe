@@ -3,4 +3,4 @@
  * @file Exports public types from the module.
  */
 
-export type {} from './interfaces.ts';
+export type { TObservable, TObserver } from './interfaces.ts';

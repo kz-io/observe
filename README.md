@@ -10,13 +10,83 @@ kz is a collection of easy-to-use utility and feature libraries for creating any
 <h1 align="center">@kz/observe</h1>
 
 <p align="center">
-
+The <code>@kz/observe</code> module provides types and features for implementing the observer pattern.
 </p>
 
 <p align="center">
 <a href="https://jsr.io/@kz/observe">Overview</a> |
 <a href="https://jsr.io/@kz/observe/doc">API Docs</a>
 </p>
+
+The observer pattern is a software design pattern in which an object, called
+the subject or observable, maintains a list of its dependents, called
+observers, and notifies them of state changes, usually by calling one of
+their methods.
+
+## Examples
+
+```ts
+import { TAbstractObserver, TBaseObservable } from './mod.ts';
+
+interface ILocation {
+  lat: number;
+  lon: number;
+}
+
+class LocationReporter extends TBaseObservable<ILocation> {
+  public publish(location: ILocation): void {
+    try {
+      if (location.lat < -90 || location.lat > 90) {
+        throw new Error('Invalid latitude');
+      }
+
+      super.publish(location);
+    } catch (error) {
+      this.onError(error);
+    }
+  }
+}
+
+class LocationTracker extends TAbstractObserver<ILocation> {
+  protected _locations: ILocation[] = [];
+
+  public get locations(): ILocation[] {
+    return this._locations;
+  }
+
+  public next(location: ILocation): void {
+    if (this.subscription && this.subscription.isDisposed) return;
+
+    this._locations.push(location);
+  }
+
+  public error(error: Error): void {
+    console.log(error.message);
+  }
+}
+
+const reporter = new LocationReporter();
+const localTracker = new LocationTracker();
+const remoteTracker = new LocationTracker();
+
+const localSub = reporter.subscribe(localTracker);
+const remoteSub = reporter.subscribe(remoteTracker);
+
+reporter.publish({ lat: 37.7749, lon: -122.4194 });
+reporter.publish({ lat: 40.7128, lon: -74.0060 });
+
+console.log(localTracker.locations.length); // 2
+console.log(remoteTracker.locations.length); // 2
+
+localSub.dispose();
+
+reporter.publish({ lat: 51.5074, lon: -0.1278 });
+
+remoteSub.dispose();
+
+console.log(localTracker.locations.length); // 2
+console.log(remoteTracker.locations.length); // 3
+```
 
 ## Contributing
 
